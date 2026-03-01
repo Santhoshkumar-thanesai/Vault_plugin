@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Install Vault
@@ -17,8 +17,14 @@ jobs:
           unzip vault.zip
           sudo mv vault /usr/local/bin/
 
+      - name: Start Vault dev server
+        run: |
+          vault server -dev -dev-root-token-id=root > vault.log 2>&1 &
+          sleep 5
+
       - name: Read Secret from Vault
         run: |
-          export VAULT_ADDR=${{ secrets.VAULT_ADDR }}
-          export VAULT_TOKEN=${{ secrets.VAULT_TOKEN }}
+          export VAULT_ADDR=http://127.0.0.1:8200
+          export VAULT_TOKEN=root
+          vault kv put secret/myapp foo=bar
           vault kv get secret/myapp
