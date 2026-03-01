@@ -1,13 +1,24 @@
- 
-name: My First GitHub Action
+name: Vault Secret Demo
 
 on:
   push:
 
 jobs:
-  test:
+  vault-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Print Hello
-        run: echo "GitHub Actions is working!"
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Vault
+        run: |
+          curl -fsSL https://releases.hashicorp.com/vault/1.15.0/vault_1.15.0_linux_amd64.zip -o vault.zip
+          unzip vault.zip
+          sudo mv vault /usr/local/bin/
+
+      - name: Read Secret from Vault
+        run: |
+          export VAULT_ADDR=${{ secrets.VAULT_ADDR }}
+          export VAULT_TOKEN=${{ secrets.VAULT_TOKEN }}
+          vault kv get secret/myapp
